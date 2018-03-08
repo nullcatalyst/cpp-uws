@@ -2,7 +2,7 @@
 
 #ifdef USE_EPOLL
 
-namespace uS {
+namespace uws::impl {
 
 // todo: remove this mutex, have callbacks set at program start
 std::recursive_mutex cbMutex;

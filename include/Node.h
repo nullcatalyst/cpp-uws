@@ -5,7 +5,7 @@
 #include <vector>
 #include <mutex>
 
-namespace uS {
+namespace uws::impl {
 
 enum ListenOptions : int {
     REUSE_PORT = 1,
@@ -85,7 +85,7 @@ public:
         return loop;
     }
 
-    template <uS::Socket *I(Socket *s), void C(Socket *p, bool error)>
+    template <Socket *I(Socket *s), void C(Socket *p, bool error)>
     Socket *connect(const char *hostname, int port, bool secure, NodeData *nodeData) {
         Context *netContext = nodeData->netContext;
 
@@ -114,7 +114,7 @@ public:
         }
 
         Socket initialSocket(nodeData, getLoop(), fd, ssl);
-        uS::Socket *socket = I(&initialSocket);
+        Socket *socket = I(&initialSocket);
 
         socket->setCb(connect_cb<C>);
         socket->start(loop, socket, socket->setPoll(UV_WRITABLE));
@@ -123,7 +123,7 @@ public:
 
     // todo: hostname, backlog
     template <void A(Socket *s)>
-    bool listen(const char *host, int port, uS::TLS::Context sslContext, int options, uS::NodeData *nodeData, void *user) {
+    bool listen(const char *host, int port, TLS::Context sslContext, int options, NodeData *nodeData, void *user) {
         addrinfo hints, *result;
         memset(&hints, 0, sizeof(addrinfo));
 
@@ -139,7 +139,7 @@ public:
 
         uv_os_sock_t listenFd = SOCKET_ERROR;
         addrinfo *listenAddr;
-        if ((options & uS::ONLY_IPV4) == 0) {
+        if ((options & ONLY_IPV4) == 0) {
             for (addrinfo *a = result; a && listenFd == SOCKET_ERROR; a = a->ai_next) {
                 if (a->ai_family == AF_INET6) {
                     listenFd = netContext->createSocket(a->ai_family, a->ai_socktype, a->ai_protocol);

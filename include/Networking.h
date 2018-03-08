@@ -75,7 +75,7 @@ inline SOCKET dup(SOCKET socket) {
 #include <algorithm>
 #include <memory>
 
-namespace uS {
+namespace uws::impl {
 
 // todo: mark sockets nonblocking in these functions
 // todo: probably merge this Context with the TLS::Context for same interface for SSL and non-SSL!
@@ -201,7 +201,7 @@ struct WIN32_EXPORT NodeData {
     char *recvBuffer;
     int recvLength;
     Loop *loop;
-    uS::Context *netContext;
+    Context *netContext;
     void *user = nullptr;
     static const int preAllocMaxSize = 1024;
     char **preAlloc;

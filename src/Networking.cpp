@@ -1,6 +1,6 @@
 #include "Networking.h"
 
-namespace uS {
+namespace uws::impl {
 
 namespace TLS {
 

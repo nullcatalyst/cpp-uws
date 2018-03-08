@@ -13,7 +13,7 @@ template <bool isServer>
 struct HttpSocket;
 
 template <const bool isServer>
-struct WIN32_EXPORT WebSocket : uS::Socket, WebSocketState<isServer> {
+struct WIN32_EXPORT WebSocket : impl::Socket, WebSocketState<isServer> {
 protected:
     std::string fragmentBuffer;
     enum CompressionStatus : char {
@@ -23,13 +23,13 @@ protected:
     } compressionStatus;
     unsigned char controlTipLength = 0, hasOutstandingPong = false;
 
-    WebSocket(bool perMessageDeflate, uS::Socket *socket) : uS::Socket(std::move(*socket)) {
+    WebSocket(bool perMessageDeflate, impl::Socket *socket) : impl::Socket(std::move(*socket)) {
         compressionStatus = perMessageDeflate ? CompressionStatus::ENABLED : CompressionStatus::DISABLED;
     }
 
-    static uS::Socket *onData(uS::Socket *s, char *data, size_t length);
-    static void onEnd(uS::Socket *s);
-    using uS::Socket::closeSocket;
+    static impl::Socket *onData(impl::Socket *s, char *data, size_t length);
+    static void onEnd(impl::Socket *s);
+    using impl::Socket::closeSocket;
 
     static bool refusePayloadLength(uint64_t length, WebSocketState<isServer> *webSocketState) {
         WebSocket<isServer> *webSocket = static_cast<WebSocket<isServer> *>(webSocketState);
@@ -80,7 +80,7 @@ public:
     friend struct Hub;
     friend struct Group<isServer>;
     friend struct HttpSocket<isServer>;
-    friend struct uS::Socket;
+    friend struct impl::Socket;
     friend class WebSocketProtocol<isServer, WebSocket<isServer>>;
 };
 

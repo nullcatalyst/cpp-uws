@@ -16,7 +16,7 @@ enum ListenOptions {
 struct Hub;
 
 template <bool isServer>
-struct WIN32_EXPORT Group : private uS::NodeData {
+struct WIN32_EXPORT Group : private impl::NodeData {
 protected:
     friend struct Hub;
     friend struct WebSocket<isServer>;
@@ -42,13 +42,13 @@ protected:
     unsigned int maxPayload;
     Hub *hub;
     int extensionOptions;
-    uS::Timer *timer = nullptr, *httpTimer = nullptr;
+    impl::Timer *timer = nullptr, *httpTimer = nullptr;
     std::string userPingMessage;
-    std::stack<uS::Poll *> iterators;
+    std::stack<impl::Poll *> iterators;
 
     // todo: cannot be named user, collides with parent!
     void *userData = nullptr;
-    static void timerCallback(uS::Timer *timer);
+    static void timerCallback(impl::Timer *timer);
 
     WebSocket<isServer> *webSocketHead = nullptr;
     HttpSocket<isServer> *httpSocketHead = nullptr;
@@ -60,7 +60,7 @@ protected:
     void addHttpSocket(HttpSocket<isServer> *httpSocket);
     void removeHttpSocket(HttpSocket<isServer> *httpSocket);
 
-    Group(int extensionOptions, unsigned int maxPayload, Hub *hub, uS::NodeData *nodeData);
+    Group(int extensionOptions, unsigned int maxPayload, Hub *hub, impl::NodeData *nodeData);
     void stopListening();
 
 public:
@@ -103,14 +103,14 @@ public:
 
     template <class F>
     void forEach(const F &cb) {
-        uS::Poll *iterator = webSocketHead;
+        impl::Poll *iterator = webSocketHead;
         iterators.push(iterator);
         while (iterator) {
-            uS::Poll *lastIterator = iterator;
+            impl::Poll *lastIterator = iterator;
             cb((WebSocket<isServer> *) iterator);
             iterator = iterators.top();
             if (lastIterator == iterator) {
-                iterator = ((uS::Socket *) iterator)->next;
+                iterator = ((impl::Socket *) iterator)->next;
                 iterators.top() = iterator;
             }
         }
@@ -120,21 +120,21 @@ public:
     // duplicated code for now!
     template <class F>
     void forEachHttpSocket(const F &cb) {
-        uS::Poll *iterator = httpSocketHead;
+        impl::Poll *iterator = httpSocketHead;
         iterators.push(iterator);
         while (iterator) {
-            uS::Poll *lastIterator = iterator;
+            impl::Poll *lastIterator = iterator;
             cb((HttpSocket<isServer> *) iterator);
             iterator = iterators.top();
             if (lastIterator == iterator) {
-                iterator = ((uS::Socket *) iterator)->next;
+                iterator = ((impl::Socket *) iterator)->next;
                 iterators.top() = iterator;
             }
         }
         iterators.pop();
     }
 
-    static Group<isServer> *from(uS::Socket *s) {
+    static Group<isServer> *from(impl::Socket *s) {
         return static_cast<Group<isServer> *>(s->getNodeData());
     }
 };

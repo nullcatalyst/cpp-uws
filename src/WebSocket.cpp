@@ -171,7 +171,7 @@ void WebSocket<isServer>::finalizeMessage(typename WebSocket<isServer>::Prepared
 }
 
 template <bool isServer>
-uS::Socket *WebSocket<isServer>::onData(uS::Socket *s, char *data, size_t length) {
+impl::Socket *WebSocket<isServer>::onData(impl::Socket *s, char *data, size_t length) {
     WebSocket<isServer> *webSocket = static_cast<WebSocket<isServer> *>(s);
 
     webSocket->hasOutstandingPong = false;
@@ -228,7 +228,7 @@ void WebSocket<isServer>::transfer(Group<isServer> *group) {
         Group<isServer>::from(this)->transferHandler(this);
     } else {
         // slow path
-        uS::Socket::transfer((uS::NodeData *) group, [](Poll *p) {
+        impl::Socket::transfer((impl::NodeData *) group, [](Poll *p) {
             WebSocket<isServer> *webSocket = (WebSocket<isServer> *) p;
             Group<isServer>::from(webSocket)->addWebSocket(webSocket);
             Group<isServer>::from(webSocket)->transferHandler(webSocket);
@@ -269,7 +269,7 @@ void WebSocket<isServer>::close(int code, const char *message, size_t length) {
 }
 
 template <bool isServer>
-void WebSocket<isServer>::onEnd(uS::Socket *s) {
+void WebSocket<isServer>::onEnd(impl::Socket *s) {
     WebSocket<isServer> *webSocket = static_cast<WebSocket<isServer> *>(s);
 
     if (!webSocket->isShuttingDown()) {

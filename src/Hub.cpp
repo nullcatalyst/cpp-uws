@@ -40,7 +40,7 @@ char *Hub::inflate(char *data, size_t &length, size_t maxPayload) {
     return inflationBuffer;
 }
 
-void Hub::onServerAccept(uS::Socket *s) {
+void Hub::onServerAccept(impl::Socket *s) {
     HttpSocket<SERVER> *httpSocket = new HttpSocket<SERVER>(s);
     delete s;
 
@@ -51,7 +51,7 @@ void Hub::onServerAccept(uS::Socket *s) {
     Group<SERVER>::from(httpSocket)->httpConnectionHandler(httpSocket);
 }
 
-void Hub::onClientConnection(uS::Socket *s, bool error) {
+void Hub::onClientConnection(impl::Socket *s, bool error) {
     HttpSocket<CLIENT> *httpSocket = (HttpSocket<CLIENT> *) s;
 
     if (error) {
@@ -64,24 +64,24 @@ void Hub::onClientConnection(uS::Socket *s, bool error) {
     }
 }
 
-bool Hub::listen(const char *host, int port, uS::TLS::Context sslContext, int options, Group<SERVER> *eh) {
+bool Hub::listen(const char *host, int port, impl::TLS::Context sslContext, int options, Group<SERVER> *eh) {
     if (!eh) {
         eh = (Group<SERVER> *) this;
     }
 
-    if (uS::Node::listen<onServerAccept>(host, port, sslContext, options, (uS::NodeData *) eh, nullptr)) {
+    if (impl::Node::listen<onServerAccept>(host, port, sslContext, options, (impl::NodeData *) eh, nullptr)) {
         eh->errorHandler(port);
         return false;
     }
     return true;
 }
 
-bool Hub::listen(int port, uS::TLS::Context sslContext, int options, Group<SERVER> *eh) {
+bool Hub::listen(int port, impl::TLS::Context sslContext, int options, Group<SERVER> *eh) {
     return listen(nullptr, port, sslContext, options, eh);
 }
 
-uS::Socket *allocateHttpSocket(uS::Socket *s) {
-    return (uS::Socket *) new HttpSocket<CLIENT>(s);
+impl::Socket *allocateHttpSocket(impl::Socket *s) {
+    return (impl::Socket *) new HttpSocket<CLIENT>(s);
 }
 
 bool parseURI(std::string &uri, bool &secure, std::string &hostname, int &port, std::string &path) {
@@ -158,7 +158,7 @@ void Hub::connect(std::string uri, void *user, std::map<std::string, std::string
     if (!parseURI(uri, secure, hostname, port, path)) {
         eh->errorHandler(user);
     } else {
-        HttpSocket<CLIENT> *httpSocket = (HttpSocket<CLIENT> *) uS::Node::connect<allocateHttpSocket, onClientConnection>(hostname.c_str(), port, secure, eh);
+        HttpSocket<CLIENT> *httpSocket = (HttpSocket<CLIENT> *) impl::Node::connect<allocateHttpSocket, onClientConnection>(hostname.c_str(), port, secure, eh);
         if (httpSocket) {
             // startTimeout occupies the user
             httpSocket->startTimeout<HttpSocket<CLIENT>::onEnd>(timeoutMs);
@@ -192,7 +192,7 @@ void Hub::upgrade(uv_os_sock_t fd, const char *secKey, SSL *ssl, const char *ext
         serverGroup = &getDefaultGroup<SERVER>();
     }
 
-    uS::Socket s((uS::NodeData *) serverGroup, serverGroup->loop, fd, ssl);
+    impl::Socket s((impl::NodeData *) serverGroup, serverGroup->loop, fd, ssl);
     s.setNoDelay(true);
 
     // todo: skip httpSocket -> it cannot fail anyways!

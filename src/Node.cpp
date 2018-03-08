@@ -1,6 +1,6 @@
 #include "Node.h"
 
-namespace uS {
+namespace uws::impl {
 
 // this should be Node
 void NodeData::asyncCallback(Async *async)

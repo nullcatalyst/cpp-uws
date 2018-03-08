@@ -3,7 +3,7 @@
 
 #include "Networking.h"
 
-namespace uS {
+namespace uws::impl {
 
 struct TransferData {
     // Connection state
@@ -354,7 +354,7 @@ protected:
         size_t estimatedLength = T::estimate(message, length) + sizeof(Queue::Message);
 
         if (hasEmptyQueue()) {
-            if (estimatedLength <= uS::NodeData::preAllocMaxSize) {
+            if (estimatedLength <= NodeData::preAllocMaxSize) {
                 int memoryLength = estimatedLength;
                 int memoryIndex = nodeData->getMemoryBlockIndex(memoryLength);
 
@@ -499,7 +499,7 @@ struct ListenSocket : Socket {
     }
 
     Timer *timer = nullptr;
-    uS::TLS::Context sslContext;
+    TLS::Context sslContext;
 };
 
 }

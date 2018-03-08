@@ -106,7 +106,7 @@ struct HttpRequest {
 struct HttpResponse;
 
 template <const bool isServer>
-struct WIN32_EXPORT HttpSocket : uS::Socket {
+struct WIN32_EXPORT HttpSocket : impl::Socket {
     void *httpUser; // remove this later, setTimeout occupies user for now
     HttpResponse *outstandingResponsesHead = nullptr;
     HttpResponse *outstandingResponsesTail = nullptr;
@@ -116,7 +116,7 @@ struct WIN32_EXPORT HttpSocket : uS::Socket {
     size_t contentLength = 0;
     bool missedDeadline = false;
 
-    HttpSocket(uS::Socket *socket) : uS::Socket(std::move(*socket)) {}
+    HttpSocket(impl::Socket *socket) : impl::Socket(std::move(*socket)) {}
 
     void terminate() {
         onEnd(this);
@@ -127,11 +127,11 @@ struct WIN32_EXPORT HttpSocket : uS::Socket {
                  size_t subprotocolLength, bool *perMessageDeflate);
 
 private:
-    friend struct uS::Socket;
+    friend struct impl::Socket;
     friend struct HttpResponse;
     friend struct Hub;
-    static uS::Socket *onData(uS::Socket *s, char *data, size_t length);
-    static void onEnd(uS::Socket *s);
+    static impl::Socket *onData(impl::Socket *s, char *data, size_t length);
+    static void onEnd(impl::Socket *s);
 };
 
 struct HttpResponse {

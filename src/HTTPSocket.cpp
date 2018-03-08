@@ -53,7 +53,7 @@ static void base64(unsigned char *src, char *dst) {
 }
 
 template <bool isServer>
-uS::Socket *HttpSocket<isServer>::onData(uS::Socket *s, char *data, size_t length) {
+impl::Socket *HttpSocket<isServer>::onData(impl::Socket *s, char *data, size_t length) {
     HttpSocket<isServer> *httpSocket = (HttpSocket<isServer> *) s;
 
     httpSocket->cork(true);
@@ -263,7 +263,7 @@ void HttpSocket<isServer>::upgrade(const char *secKey, const char *extensions, s
 }
 
 template <bool isServer>
-void HttpSocket<isServer>::onEnd(uS::Socket *s) {
+void HttpSocket<isServer>::onEnd(impl::Socket *s) {
     HttpSocket<isServer> *httpSocket = (HttpSocket<isServer> *) s;
 
     if (!httpSocket->isShuttingDown()) {

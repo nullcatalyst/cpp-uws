@@ -33,12 +33,13 @@ PRIVATE
 
 target_compile_options(uws
 PRIVATE
-    -std=c++11
+    -std=c++1z
 )
 
 target_link_libraries(uws
 PUBLIC
+    b64
     uv
-    z
     OpenSSL::SSL
+    z
 )

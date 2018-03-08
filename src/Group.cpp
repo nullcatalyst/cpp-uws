@@ -14,7 +14,7 @@ void *Group<isServer>::getUserData() {
 }
 
 template <bool isServer>
-void Group<isServer>::timerCallback(uS::Timer *timer) {
+void Group<isServer>::timerCallback(impl::Timer *timer) {
     Group<isServer> *group = (Group<isServer> *) timer->getData();
 
     group->forEach([](WebSocket<isServer> *webSocket) {
@@ -34,7 +34,7 @@ void Group<isServer>::timerCallback(uS::Timer *timer) {
 
 template <bool isServer>
 void Group<isServer>::startAutoPing(int intervalMs, std::string userMessage) {
-    timer = new uS::Timer(loop);
+    timer = new impl::Timer(loop);
     timer->setData(this);
     timer->start(timerCallback, intervalMs, intervalMs);
     userPingMessage = userMessage;
@@ -48,9 +48,9 @@ void Group<isServer>::addHttpSocket(HttpSocket<isServer> *httpSocket) {
     } else {
         httpSocket->next = nullptr;
         // start timer
-        httpTimer = new uS::Timer(hub->getLoop());
+        httpTimer = new impl::Timer(hub->getLoop());
         httpTimer->setData(this);
-        httpTimer->start([](uS::Timer *httpTimer) {
+        httpTimer->start([](impl::Timer *httpTimer) {
             Group<isServer> *group = (Group<isServer> *) httpTimer->getData();
             group->forEachHttpSocket([](HttpSocket<isServer> *httpSocket) {
                 if (httpSocket->missedDeadline) {
@@ -118,7 +118,7 @@ void Group<isServer>::removeWebSocket(WebSocket<isServer> *webSocket) {
 }
 
 template <bool isServer>
-Group<isServer>::Group(int extensionOptions, unsigned int maxPayload, Hub *hub, uS::NodeData *nodeData) : uS::NodeData(*nodeData), maxPayload(maxPayload), hub(hub), extensionOptions(extensionOptions) {
+Group<isServer>::Group(int extensionOptions, unsigned int maxPayload, Hub *hub, impl::NodeData *nodeData) : impl::NodeData(*nodeData), maxPayload(maxPayload), hub(hub), extensionOptions(extensionOptions) {
     connectionHandler = [](WebSocket<isServer> *, HttpRequest) {};
     transferHandler = [](WebSocket<isServer> *) {};
     messageHandler = [](WebSocket<isServer> *, char *, size_t, OpCode) {};
@@ -139,14 +139,14 @@ void Group<isServer>::stopListening() {
     if (isServer) {
         if (user) {
             // todo: we should allow one group to listen to many ports!
-            uS::ListenSocket *listenSocket = (uS::ListenSocket *) user;
+            impl::ListenSocket *listenSocket = (impl::ListenSocket *) user;
 
             if (listenSocket->timer) {
                 listenSocket->timer->stop();
                 listenSocket->timer->close();
             }
 
-            listenSocket->closeSocket<uS::ListenSocket>();
+            listenSocket->closeSocket<impl::ListenSocket>();
 
             // mark as stopped listening (extra care?)
             user = nullptr;
