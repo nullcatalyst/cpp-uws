@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(uws)
 
+set(WEBSOCKET_KEY "d2Vic29ja2V0c2VjcmV0a2V5" CACHE STRING "A 24 ascii character string used to establish a WebSocket connection with a server")
+
 add_library(uws "")
 
 find_package(OpenSSL REQUIRED)

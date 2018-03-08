@@ -2,6 +2,10 @@
 #include "HTTPSocket.h"
 #include <openssl/sha.h>
 
+#ifndef WEBSOCKET_KEY
+#define WEBSOCKET_KEY "d2Vic29ja2V0c2VjcmV0a2V5"
+#endif
+
 namespace uws {
 
 char *Hub::inflate(char *data, size_t &length, size_t maxPayload) {
@@ -164,16 +168,14 @@ void Hub::connect(std::string uri, void *user, std::map<std::string, std::string
             httpSocket->startTimeout<HttpSocket<CLIENT>::onEnd>(timeoutMs);
             httpSocket->httpUser = user;
 
-            std::string randomKey = "x3JJHMbDL1EzLkh9GBhXDw==";
-//            for (int i = 0; i < 22; i++) {
-//                randomKey[i] = rand() %
-//            }
+            /// TODO: We might want this randomly generated in the future
+            const std::string wsKey = WEBSOCKET_KEY;
 
             httpSocket->httpBuffer = "GET /" + path + " HTTP/1.1\r\n"
+                                     "Host: " + hostname + "\r\n"
                                      "Upgrade: websocket\r\n"
                                      "Connection: Upgrade\r\n"
-                                     "Sec-WebSocket-Key: " + randomKey + "\r\n"
-                                     "Host: " + hostname + "\r\n" +
+                                     "Sec-WebSocket-Key: " + wsKey + "\r\n"
                                      "Sec-WebSocket-Version: 13\r\n";
 
             for (std::pair<std::string, std::string> header : extraHeaders) {

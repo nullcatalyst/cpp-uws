@@ -1,7 +1,9 @@
+#include <cstdio>
+#include <b64.h>
+
 #include "HTTPSocket.h"
 #include "Group.h"
 #include "Extensions.h"
-#include <cstdio>
 
 #define MAX_HEADERS 100
 #define MAX_HEADER_BUFFER_SIZE 4096
@@ -35,21 +37,6 @@ char *getHeaders(char *buffer, char *end, Header *headers, size_t maxHeaders) {
         }
     }
     return nullptr;
-}
-
-// UNSAFETY NOTE: assumes 24 byte input length
-static void base64(unsigned char *src, char *dst) {
-    static const char *b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    for (int i = 0; i < 18; i += 3) {
-        *dst++ = b64[(src[i] >> 2) & 63];
-        *dst++ = b64[((src[i] & 3) << 4) | ((src[i + 1] & 240) >> 4)];
-        *dst++ = b64[((src[i + 1] & 15) << 2) | ((src[i + 2] & 192) >> 6)];
-        *dst++ = b64[src[i + 2] & 63];
-    }
-    *dst++ = b64[(src[18] >> 2) & 63];
-    *dst++ = b64[((src[18] & 3) << 4) | ((src[19] & 240) >> 4)];
-    *dst++ = b64[((src[19] & 15) << 2)];
-    *dst++ = '=';
 }
 
 template <bool isServer>
@@ -225,7 +212,7 @@ void HttpSocket<isServer>::upgrade(const char *secKey, const char *extensions, s
 
         char upgradeBuffer[1024];
         memcpy(upgradeBuffer, "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ", 97);
-        base64(shaDigest, upgradeBuffer + 97);
+        b64::encode(shaDigest, SHA_DIGEST_LENGTH, &upgradeBuffer[97]);
         memcpy(upgradeBuffer + 125, "\r\n", 2);
         size_t upgradeResponseLength = 127;
         if (extensionsResponse.length() && extensionsResponse.length() < 200) {
